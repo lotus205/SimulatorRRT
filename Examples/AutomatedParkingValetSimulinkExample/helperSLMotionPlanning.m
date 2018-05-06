@@ -1,0 +1,56 @@
+function referencePath = helperSLMotionPlanning(costmapStruct, vehicleDimsStruct, ...
+    currentPose, nextGoal, plannerConfig, startPose, ...
+    minIterations, connectionDistance, minTurningRadius)
+
+%helperSLMotionPlanning plan a feasible path.
+
+% Copyright 2017-2018 The MathWorks, Inc.
+
+persistent motionPlanner nextGoalPose refPath vehiclePose
+
+if isempty(motionPlanner)
+    % Initialize vehicleDimensions object
+    vehicleDims = vehicleDimensions( ...
+        vehicleDimsStruct.Length, ...
+        vehicleDimsStruct.Width, ...
+        vehicleDimsStruct.Height, ...
+        'Wheelbase',         vehicleDimsStruct.Wheelbase, ...
+        'RearOverhang',      vehicleDimsStruct.RearOverhang, ...
+        'WorldUnits',        char(vehicleDimsStruct.WorldUnits));
+    
+    % Initialize vehicleCostmap object
+    costmap = vehicleCostmap(costmapStruct.Costs, ...
+        'FreeThreshold',     costmapStruct.FreeThreshold, ...
+        'OccupiedThreshold', costmapStruct.OccupiedThreshold, ...
+        'MapLocation',       costmapStruct.MapExtent([1, 3]), ...
+        'CellSize',          costmapStruct.CellSize, ...
+        'VehicleDimensions', vehicleDims, ...
+        'InflationRadius',   costmapStruct.InflationRadius);
+    
+    % Initialize pathPlannerRRT object
+    motionPlanner = pathPlannerRRT(costmap, ...
+        'MinIterations',     minIterations, ...
+        'ConnectionDistance',connectionDistance, ...
+        'MinTurningRadius',  minTurningRadius);
+    
+    motionPlanner = helperSLMatchStructFields(motionPlanner, plannerConfig);
+    nextGoalPose  = nextGoal;
+    vehiclePose   = startPose;
+    refPath       = plan(motionPlanner, vehiclePose, nextGoalPose);
+end
+
+% Plan a new path if there is a new goal pose
+if ~isequal(nextGoalPose, nextGoal)
+    motionPlanner = helperSLMatchStructFields(motionPlanner, plannerConfig);
+    nextGoalPose  = nextGoal;
+    vehiclePose   = currentPose;
+    refPath       = plan(motionPlanner, vehiclePose, nextGoalPose);  
+end
+
+% Output reference path as a bus signal
+referencePath                    = struct;
+referencePath.KeyPoses           = refPath.KeyPoses;
+referencePath.Cost               = refPath.Cost;
+referencePath.ConnectionMethod   = uint8(refPath.ConnectionMethod);
+
+
