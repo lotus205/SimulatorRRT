@@ -18,6 +18,9 @@ helpsearch*/
 slprj/
 sccprj/
 
+# Simulink examples
+Examples/LKAWithLaneDetectionExample/slprj/
+
 # Simulink autosave extension
 *.autosave
 
