@@ -20,6 +20,7 @@ sccprj/
 
 # Simulink examples
 Examples/LKAWithLaneDetectionExample/slprj/
+Learning/LKAWithLaneDetectionExample/slprj/
 
 # Simulink autosave extension
 *.autosave
