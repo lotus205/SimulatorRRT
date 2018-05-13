@@ -66,7 +66,7 @@ road(scenario, roadCenters, 'Lanes', laneSpecification);
 % Add ego car
 egoCar = vehicle(scenario, ...
     'ClassID', 1);
-path(egoCar, waypoints, speed);
+trajectory(egoCar, waypoints, speed);
 
 if plotScenario
     plot(scenario,'Waypoints','on');
