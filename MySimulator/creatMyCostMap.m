@@ -19,15 +19,15 @@ mapLayers.RoudBoundaries = ~mapLayers.RoudBoundaries;
 
 load patchActors.mat
 mapLayers.Actors = ones(size(X));
-% for iActor=1:numel(actors)
-    iActor = numel(actors);
+for iActor=1:numel(actors)
+%     iActor = numel(actors);
     actor = actors(iActor);
                     
     % get faces in scenario coordinates for this actor
     faces = scenarioFaces(actor);
     face = faces(:,:,6)';
     mapLayers.Actors = mapLayers.Actors - inpolygon(X,Y,face(:,1),face(:,2));
-% end
+end
 mapLayers.Actors = ~mapLayers.Actors;
 
 toc

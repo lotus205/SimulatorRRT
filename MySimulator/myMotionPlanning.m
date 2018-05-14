@@ -35,6 +35,7 @@ if isempty(motionPlanner)
     
     nextGoalPose  = nextGoal;
     vehiclePose   = startPose;
+    fprintf('myrrt built');
     controlSequence = plan(motionPlanner, vehiclePose, nextGoalPose);
 end
 

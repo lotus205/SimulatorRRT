@@ -439,13 +439,13 @@ classdef myPath
     methods (Hidden, Static)
         %------------------------------------------------------------------
         function this = create(varargin)
-            this = driving.Path(varargin{:});
+            this = myPath(varargin{:});
         end
     end
     
     methods (Access = protected)
         %------------------------------------------------------------------
-        function this = Path(poses, connMech, totalCost)
+        function this = myPath(poses, connMech, totalCost)
             
             if nargin == 0
                 return;

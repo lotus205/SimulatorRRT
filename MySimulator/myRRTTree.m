@@ -57,6 +57,8 @@ classdef myRRTTree < vision.internal.EnforceScalarHandle
         
         RewireFactor = 1;
         kRRT
+        
+        pActions
     end
     
     
@@ -78,6 +80,19 @@ classdef myRRTTree < vision.internal.EnforceScalarHandle
             this.Precision  = precision;
             
             this.reset();
+            
+            numAngles = 6;
+            numForces = 3;
+            numActions = numAngles * numForces;
+            SteeringAngles = linspace(-40, 40, numAngles);
+            Forces = linspace(-500, 500, numForces);
+            this.pActions = zeros(numActions, 2);
+            
+            for i = 1:numAngles
+                for j = 1:numForces
+                     this.pActions(i * j, :) = [SteeringAngles(i) Forces(j)];
+                end
+            end
         end
         
         %------------------------------------------------------------------
@@ -94,7 +109,7 @@ classdef myRRTTree < vision.internal.EnforceScalarHandle
             this.NodeBuffer = zeros(this.BufferSize, nodeDim, precision);
             this.EdgeBuffer = zeros(this.BufferSize, 2, 'uint32');
             this.CostBuffer = zeros(this.BufferSize, 1, precision);
-            this.ActionBuffer = zeros(this.BufferSize, 1, precision);
+            this.ActionBuffer = zeros(this.BufferSize, 2, precision);
             
     
             this.NodeIndex = 1;
@@ -108,6 +123,7 @@ classdef myRRTTree < vision.internal.EnforceScalarHandle
             stateDim = this.NodeDim-1;
             this.kRRT = this.RewireFactor * 2^(stateDim + 1) * exp(1) ...
                 * (1 + 1/stateDim);
+            
         end
         
         %------------------------------------------------------------------
@@ -143,7 +159,7 @@ classdef myRRTTree < vision.internal.EnforceScalarHandle
         end
         
         %------------------------------------------------------------------
-        function addEdge(this, fromId, toId, action)
+        function addEdge(this, fromId, toId)
             
             edgeId = this.EdgeIndex;
             
@@ -152,11 +168,20 @@ classdef myRRTTree < vision.internal.EnforceScalarHandle
             this.CostBuffer(edgeId) = this.costTo(fromId) + ...
                 this.edgeCost(fromId, toId);
             
+            action = this.chooseBestInput(fromId, toId);
+            
             this.ActionBuffer(edgeId, :) = action;
             
             this.EdgeIndex = edgeId + 1;
         end
         
+        function action = chooseBestInput(this, fromId, toId)
+            actions = this.Actions;
+            finalPoses = forwardPropagate(this.NodeBuffer(fromId,:), this.pActions);
+            distances = this.NeighborSearcher.distance(finalPoses, this.NodeBuffer(toId, :));
+            [~, minId] = min(distances);
+            action = actions(minId);
+        end
         %------------------------------------------------------------------
         function parentId = nodeParent(this, childId)
             

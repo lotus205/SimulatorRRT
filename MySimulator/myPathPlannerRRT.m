@@ -194,7 +194,7 @@ classdef myPathPlannerRRT < driving.planning.PathPlanner
         %   +/-yTol, +/-thetaTol] of the goalPose.
         %
         %   Default: [0.5, 0.5, 5]
-        GoalTolerance = [0.5, 0.5, 5];
+        GoalTolerance = [0.5, 0.5, 5, 2, 2, 3];
         
         %GoalBias Probability of selecting goal pose.
         %   Probability with which to select goal pose for tree expansion.
@@ -319,7 +319,7 @@ classdef myPathPlannerRRT < driving.planning.PathPlanner
         %------------------------------------------------------------------
         function this = myPathPlannerRRT(varargin)
             
-            plannerDims = 3;
+            plannerDims = 6;
             this = this@driving.planning.PathPlanner(mfilename, plannerDims);
             
             inputs = this.parseInputs(varargin{:});
@@ -694,7 +694,7 @@ classdef myPathPlannerRRT < driving.planning.PathPlanner
             this.Sampler.reset();
             
             % Initialize path to empty
-            this.Path = driving.Path.create();
+            this.Path = myPath.create();
             this.GoalNodes      = [];
             this.BestGoalNode   = [];
             this.BestCost       = inf;
@@ -739,7 +739,7 @@ classdef myPathPlannerRRT < driving.planning.PathPlanner
                     nearestPose, nearestId, newPose, newId);
                 
                 % Rewire tree
-                this.rewireTree(nearPoses, nearIds, newPose, newId);
+%                 this.rewireTree(nearPoses, nearIds, newPose, newId);
                 
                 if this.inGoalRegion(newPose)
                     
@@ -805,6 +805,7 @@ classdef myPathPlannerRRT < driving.planning.PathPlanner
                 pose = [];
             else
                 pose = posesInterp(end,:);
+                pose = [pose, towards(4:6)];
             end
         end
         
