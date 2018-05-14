@@ -279,7 +279,7 @@ classdef myPathPlannerRRT < driving.planning.PathPlanner
     properties (Access = protected)
         Name    = mfilename;
         
-        PoseDim = 3;
+        PoseDim = 6;
     end
     
     properties (Access = private, Hidden)
@@ -657,7 +657,7 @@ classdef myPathPlannerRRT < driving.planning.PathPlanner
                 this.Costmap.MapExtent, precision);
             
             % Instantiate RRT tree
-            this.Tree = driving.planning.RRTTree(this.PoseDim, precision);
+            this.Tree = myRRTTree(this.PoseDim, precision);
         end
         
         %------------------------------------------------------------------
@@ -672,6 +672,11 @@ classdef myPathPlannerRRT < driving.planning.PathPlanner
                 case 'Reeds-Shepp'
                     this.ConnectionMechanism = ...
                         driving.planning.ReedsSheppConnectionMechanism( ...
+                        this.MinTurningRadius, this.NumConnectionSteps, ...
+                        this.ConnectionDistance);
+                case 'Customize'
+                    this.ConnectionMechanism = ...
+                        myConnectionMechanism( ...
                         this.MinTurningRadius, this.NumConnectionSteps, ...
                         this.ConnectionDistance);
             end

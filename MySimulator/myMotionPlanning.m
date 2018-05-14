@@ -30,7 +30,8 @@ if isempty(motionPlanner)
     % Initialize pathPlannerRRT object
     motionPlanner = myPathPlannerRRT(costmap, ...
         'MinIterations',     minIterations, ...
-        'ConnectionDistance',connectionDistance);
+        'ConnectionDistance',connectionDistance, ...
+        'ConnectionMethod', 'Customize');
     
     nextGoalPose  = nextGoal;
     vehiclePose   = startPose;

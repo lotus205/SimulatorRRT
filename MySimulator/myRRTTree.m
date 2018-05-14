@@ -5,16 +5,19 @@ classdef myRRTTree < vision.internal.EnforceScalarHandle
     
     properties (SetAccess = private)
         %Nodes
-        %   Nodes in the tree, of size numNodes-by-3.
+        %   Nodes in the tree, of size numNodes-by-6.
         Nodes
         
         %Edges
-        %   Edges in the tree, of size numEdges-by-3.
+        %   Edges in the tree, of size numEdges-by-2.
         Edges
         
         %Costs
         %   Edge costs in the tree, of size numEdges-by-1.
         Costs
+        
+        %Actions
+        Actions
         
         %NeighborSearcher
         %   Near neighbor searcher object.
@@ -41,6 +44,8 @@ classdef myRRTTree < vision.internal.EnforceScalarHandle
         EdgeBuffer
         EdgeBufferLength
         EdgeIndex
+        
+        ActionBuffer
         
         CostBuffer
         
@@ -89,7 +94,9 @@ classdef myRRTTree < vision.internal.EnforceScalarHandle
             this.NodeBuffer = zeros(this.BufferSize, nodeDim, precision);
             this.EdgeBuffer = zeros(this.BufferSize, 2, 'uint32');
             this.CostBuffer = zeros(this.BufferSize, 1, precision);
+            this.ActionBuffer = zeros(this.BufferSize, 1, precision);
             
+    
             this.NodeIndex = 1;
             this.NodeBufferLength = this.BufferSize;
             
@@ -136,7 +143,7 @@ classdef myRRTTree < vision.internal.EnforceScalarHandle
         end
         
         %------------------------------------------------------------------
-        function addEdge(this, fromId, toId)
+        function addEdge(this, fromId, toId, action)
             
             edgeId = this.EdgeIndex;
             
@@ -144,6 +151,8 @@ classdef myRRTTree < vision.internal.EnforceScalarHandle
             
             this.CostBuffer(edgeId) = this.costTo(fromId) + ...
                 this.edgeCost(fromId, toId);
+            
+            this.ActionBuffer(edgeId, :) = action;
             
             this.EdgeIndex = edgeId + 1;
         end
@@ -155,7 +164,7 @@ classdef myRRTTree < vision.internal.EnforceScalarHandle
         end
         
         %------------------------------------------------------------------
-        function replaceParent(this, childId, newParentId)
+        function replaceParent(this, childId, newParentId, action)
             
             idx = childId-1;
             
@@ -165,6 +174,8 @@ classdef myRRTTree < vision.internal.EnforceScalarHandle
             
             this.CostBuffer(idx) = this.costTo(newParentId) + ...
                 this.edgeCost(newParentId, childId);
+            
+            this.ActionBuffer(idx) = action;
             
             this.rectifyDownstreamCosts(childId);
         end
@@ -269,6 +280,11 @@ classdef myRRTTree < vision.internal.EnforceScalarHandle
             
             costs = this.CostBuffer(1 : this.EdgeIndex-1);
         end
+        %------------------------------------------------------------------
+        function costs = get.Actions(this)
+            
+            costs = this.ActionBuffer(1 : this.EdgeIndex-1);
+        end
     end
     
     
@@ -289,7 +305,7 @@ classdef myRRTTree < vision.internal.EnforceScalarHandle
             
             this.EdgeBuffer(end+this.BufferSize,end) = 0;
             this.CostBuffer(end+this.BufferSize,end) = 0;
-            
+            this.ActionBuffer(end+this.BufferSize,end) = 0;
             this.EdgeBufferLength = size(this.EdgeBuffer,1);
         end
     end
