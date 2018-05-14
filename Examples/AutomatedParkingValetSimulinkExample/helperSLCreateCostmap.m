@@ -1,4 +1,4 @@
-function costmap = helperSLCreateCostmap()
+% function costmap = helperSLCreateCostmap()
 % helperSLCreateCostmap create a costmap for a parking lot.
 
 % Copyright 2017-2018 The MathWorks, Inc.
@@ -16,4 +16,4 @@ combinedMap = im2single(combinedMap);
 
 res = 0.5; % meters
 costmap = vehicleCostmap(combinedMap, 'CellSize', res);
-end
+% end
