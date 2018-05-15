@@ -1,9 +1,8 @@
-function
 tic
 load_system('Vehicle');
-
-from = [1 0 0  5 0 8];
-to = [10 0 0 5 0 90];
+SteeringAngles = 0 : 10 : 60;
+angles_length = length(SteeringAngles);
+EgoVleocity = 1;
 
 m       = 1575;     % Total mass of vehicle                          (kg)
 Iz      = 2875;     % Yaw moment of inertia of vehicle               (m*N*s^2)
@@ -11,22 +10,16 @@ lf      = 1.2;      % Longitudinal distance from c.g. to front tires (m)
 lr      = 1.6;      % Longitudinal distance from c.g. to rear tires  (m)
 Cf      = 19000;    % Cornering stiffness of front tires             (N/rad)
 Cr      = 33000;    % Cornering stiffness of rear tires              (N/rad)
+x0_ego = 0;
+y0_ego = 0;
+yaw0_ego = 0;
 
-x0_ego = from(1);
-y0_ego = from(2);
-yaw0_ego = from(3);
-xdot0 = from(4);
-ydot0 = from(5);
-yawrate0 = from(6);
-
-for i = numActions : -1 : 1
-    t = (0:0.01:0.1)';
-    SteeringAngle = actions(i, 1);
-    Force = actions(i, 2);
-    u2 = SteeringAngle * ones(size(t));
-    u1 = Force * ones(size(t));
+for i = angles_length : -1 : 1
+    t = (0:0.01:1)';
+    u2 = SteeringAngles(i) * ones(size(t));
+    u1 = EgoVleocity * ones(size(t));
     in(i) = Simulink.SimulationInput('Vehicle');
-    in(i) = in(i).setModelParameter('StartTime','0','StopTime','0.1');%,'SimulationMode','rapid');
+    in(i) = in(i).setModelParameter('StartTime','0','StopTime','1');
 %     in(i).ExternalInput = [t, u1, u2];
     in(i) = in(i).setExternalInput([t, u1, u2]);
     in(i) = in(i).setVariable('m',m);
@@ -38,22 +31,11 @@ for i = numActions : -1 : 1
     in(i) = in(i).setVariable('x0_ego',x0_ego);
     in(i) = in(i).setVariable('y0_ego',y0_ego);
     in(i) = in(i).setVariable('yaw0_ego',yaw0_ego);
-    in(i) = in(i).setVariable('xdot0',xdot0);
-    in(i) = in(i).setVariable('ydot0',ydot0);
-    in(i) = in(i).setVariable('yawrate0',yawrate0);
 %     out(i) = sim(in(i));
 end
 
 out = parsim(in);%,'ShowSimulationManager','on','ShowProgress','on');
 
-finalPose = zeros(numActions,6);
-for i = 1:numActions
-    for j = 1:6
-     finalPose(i,j) = out(i).yout{j}.Values.Data(end);
-    end
-end
-
-% 
 % SteeringAngles = 0 : -10 : -60;
 % 
 % for i = angles_length : -1 : 1

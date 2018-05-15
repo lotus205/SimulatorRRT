@@ -52,10 +52,10 @@ for i = 18 : -1 : 1
     in(i) = in(i).setVariable('xdot0',xdot0);
     in(i) = in(i).setVariable('ydot0',ydot0);
     in(i) = in(i).setVariable('yawrate0',yawrate0);
-%     out(i) = sim(in(i));
+    out(i) = sim(in(i));
 end
 
-out = parsim(in,'ShowSimulationManager','on','ShowProgress','on');
+% out = parsim(in,'ShowSimulationManager','on','ShowProgress','on');
 
 finalPoses = zeros(numActions,6);
 for i = 1:numActions
