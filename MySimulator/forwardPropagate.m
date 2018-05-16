@@ -9,29 +9,29 @@ lr      = 1.6;      % Longitudinal distance from c.g. to rear tires  (m)
 Cf      = 19000;    % Cornering stiffness of front tires             (N/rad)
 Cr      = 33000;    % Cornering stiffness of rear tires              (N/rad)
 
-from = [0 10 0 0 0 0];
+from = [0 0 0 0 0 0];
 x0_ego = from(1);
 y0_ego = from(2);
 yaw0_ego = from(3);
 xdot0 = from(4);
 ydot0 = from(5);
 yawrate0 = from(6);
-
-            numAngles = 6;
-            numForces = 3;
-            numActions = numAngles * numForces;
-            SteeringAngles = linspace(-40, 40, numAngles);
-            Forces = linspace(-500, 500, numForces);
-            actions = zeros(numActions, 2);
-            
-            for i = 1:numAngles
-                for j = 1:numForces
-                    actions(i * j, :) = [SteeringAngles(i) Forces(j)];
-                end
-            end
-            
-for i = 18 : -1 : 1
-    t = (0:0.01:0.1)';
+% 
+%             numAngles = 6;
+%             numForces = 3;
+%             numActions = numAngles * numForces;
+%             SteeringAngles = linspace(-40, 40, numAngles);
+%             Forces = linspace(-500, 500, numForces);
+%             actions = zeros(numActions, 2);
+%             
+%             for i = 1:numAngles
+%                 for j = 1:numForces
+%                     actions(i * j, :) = [SteeringAngles(i) Forces(j)];
+%                 end
+%             end
+      actions = [10 5000];      
+for i = 1:1
+    t = (0:0.01:1)';
     SteeringAngle = actions(i, 1);
     Force = actions(i, 2);
     u2 = SteeringAngle * ones(size(t));
@@ -55,7 +55,7 @@ for i = 18 : -1 : 1
     out(i) = sim(in(i));
 end
 
-% out = parsim(in,'ShowSimulationManager','on','ShowProgress','on');
+out = parsim(in,'ShowSimulationManager','on','ShowProgress','on');
 
 finalPoses = zeros(numActions,6);
 for i = 1:numActions
