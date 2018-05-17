@@ -9,7 +9,7 @@ lr      = 1.6;      % Longitudinal distance from c.g. to rear tires  (m)
 Cf      = 19000;    % Cornering stiffness of front tires             (N/rad)
 Cr      = 33000;    % Cornering stiffness of rear tires              (N/rad)
 
-from = [0 0 0 0 0 0];
+from = [0 0 0 10 0 0];
 x0_ego = from(1);
 y0_ego = from(2);
 yaw0_ego = from(3);
@@ -31,13 +31,13 @@ yawrate0 = from(6);
 %             end
       actions = [10 5000];      
 for i = 1:1
-    t = (0:0.01:1)';
+    t = (0:0.01:10)';
     SteeringAngle = actions(i, 1);
     Force = actions(i, 2);
     u2 = SteeringAngle * ones(size(t));
     u1 = Force * ones(size(t));
     in(i) = Simulink.SimulationInput('Vehicle');
-    in(i) = in(i).setModelParameter('StartTime','0','StopTime','0.1');%,'SimulationMode','rapid');
+    in(i) = in(i).setModelParameter('StartTime','0','StopTime','10');%,'SimulationMode','rapid');
 %     in(i).ExternalInput = [t, u1, u2];
     in(i) = in(i).setExternalInput([t, u1, u2]);
     in(i) = in(i).setVariable('m',m);
@@ -57,12 +57,12 @@ end
 
 out = parsim(in,'ShowSimulationManager','on','ShowProgress','on');
 
-finalPoses = zeros(numActions,6);
-for i = 1:numActions
-    for j = 1:6
-     finalPoses(i,j) = out(i).yout{j}.Values.Data(end);
-    end
-end
+% finalPoses = zeros(numActions,6);
+% for i = 1:numActions
+%     for j = 1:6
+%      finalPoses(i,j) = out(i).yout{j}.Values.Data(end);
+%     end
+% end
 
 % 
 % SteeringAngles = 0 : -10 : -60;
