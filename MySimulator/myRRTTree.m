@@ -22,6 +22,11 @@ classdef myRRTTree < vision.internal.EnforceScalarHandle
         %NeighborSearcher
         %   Near neighbor searcher object.
         NeighborSearcher = driving.planning.SqrtApproxNeighborSearcher;
+        
+        %Vehicle Dynamic Model
+        Vehicle = myVehicle();
+        
+        proTime = 0.3;
     end
     
     properties (Dependent, SetAccess = private)
@@ -59,6 +64,8 @@ classdef myRRTTree < vision.internal.EnforceScalarHandle
         kRRT
         
         pActions
+        
+        pNumActions
     end
     
     
@@ -81,12 +88,13 @@ classdef myRRTTree < vision.internal.EnforceScalarHandle
             
             this.reset();
             
-            numAngles = 6;
-            numForces = 3;
-            numActions = numAngles * numForces;
-            SteeringAngles = linspace(-40, 40, numAngles);
-            Forces = linspace(-500, 500, numForces);
-            this.pActions = zeros(numActions, 2);
+            numAngles = 7;
+            numForces = 4;
+            this.pNumActions = numAngles * numForces;
+            SteeringAngles = linspace(-30*pi/180, 30*pi/180, numAngles);
+%             Forces = linspace(-5000, 5000, numForces);
+            Forces = [-3000 0 2500 5000];
+            this.pActions = zeros(this.pNumActions, 2);
             
             for i = 1:numAngles
                 for j = 1:numForces
@@ -170,17 +178,26 @@ classdef myRRTTree < vision.internal.EnforceScalarHandle
             
             action = this.chooseBestInput(fromId, toId);
             
+            propagateTime = this.proTime;
+            this.NodeBuffer(toId,:) = this.Vehicle.propagate(this.NodeBuffer(fromId,:), action, propagateTime);
+            
             this.ActionBuffer(edgeId, :) = action;
             
             this.EdgeIndex = edgeId + 1;
         end
         
         function action = chooseBestInput(this, fromId, toId)
-            actions = this.Actions;
-            finalPoses = forwardPropagate(this.NodeBuffer(fromId,:), this.pActions);
+            actions = this.pActions;
+            numActions = this.pNumActions;
+            finalPoses = zeros(numActions, this.NodeDim);
+            
+            propagateTime = this.proTime;
+            for i = 1 : numActions
+                finalPoses(i,:) = this.Vehicle.propagate(this.NodeBuffer(fromId,:), this.pActions(i, :), propagateTime);
+            end
             distances = this.NeighborSearcher.distance(finalPoses, this.NodeBuffer(toId, :));
             [~, minId] = min(distances);
-            action = actions(minId);
+            action = actions(minId, :);
         end
         %------------------------------------------------------------------
         function parentId = nodeParent(this, childId)
@@ -238,7 +255,7 @@ classdef myRRTTree < vision.internal.EnforceScalarHandle
         end
         
         %------------------------------------------------------------------
-        function [path,totalCost] = shortestPathFromRoot(this, childId, goalNodeIds)
+        function [path, action, totalCost] = shortestPathFromRoot(this, childId, goalNodeIds)
             
             % Compute shortest path
             rootId = 1;
@@ -246,13 +263,16 @@ classdef myRRTTree < vision.internal.EnforceScalarHandle
             parentId = this.EdgeBuffer(edgeId, 1);
             
             path = [this.EdgeBuffer(edgeId, 2) parentId];
+            action = this.ActionBuffer(edgeId, :);
             
             while parentId ~= rootId
+                action(end+1, :) = this.ActionBuffer(parentId-1, :); %#ok<AGROW>
                 parentId = this.EdgeBuffer(parentId-1, 1);
                 path(end+1) = parentId; %#ok<AGROW>
+                
             end
             path = path(end : -1 : 1);
-            
+            action = flip(action, 1);
             % Remove self-loops
             [~,repeatedGoalNodeIds] = intersect(path, goalNodeIds, 'stable');
             

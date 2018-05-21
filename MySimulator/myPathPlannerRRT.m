@@ -194,7 +194,7 @@ classdef myPathPlannerRRT < driving.planning.PathPlanner
         %   +/-yTol, +/-thetaTol] of the goalPose.
         %
         %   Default: [0.5, 0.5, 5]
-        GoalTolerance = [0.5, 0.5, 5, 2, 2, 3];
+        GoalTolerance = [2, 2, 10, 4, 2, 2];
         
         %GoalBias Probability of selecting goal pose.
         %   Probability with which to select goal pose for tree expansion.
@@ -300,6 +300,8 @@ classdef myPathPlannerRRT < driving.planning.PathPlanner
         BestCost     = inf;
         
         Path
+        
+        Action
     end
     
     properties (Access = ?tpathPlannerRRT, Hidden)
@@ -340,65 +342,7 @@ classdef myPathPlannerRRT < driving.planning.PathPlanner
         %------------------------------------------------------------------
         function varargout = plan(this, startPose, goalPose)
             %plan Plan a path using RRT*.
-            %   refPath = plan(planner, startPose, goalPose) plans a path
-            %   from startPose towards goalPose using RRT*.
-            %
-            %   [refPath,tree] = plan(...) additionally returns the
-            %   exploration tree.
-            %
-            %
-            %   Inputs
-            %   ------
-            %   startPose   Initial vehicle pose specified as [x,y,theta].
-            %               Specify x, y in world units and theta in
-            %               degrees.
-            %
-            %
-            %   goalPose    Goal vehicle pose specified as [x,y,theta].   
-            %               Specify x, y in world units and theta in
-            %               degrees.
-            %
-            %   Outputs
-            %   -------
-            %   refPath     Planned vehicle path returned as a
-            %               driving.Path object containing reference poses
-            %               along the found path. If planning is not
-            %               successful, the path has no reference poses.
-            %               Use the checkPathValidity function to check if
-            %               the path is still valid in case the costmap is
-            %               updated.
-            %
-            %   tree        Explored tree returned as a digraph object
-            %               with nodes representing explored vehicle poses
-            %               and edges representing distance between
-            %               connected nodes.
-            %
-            %
-            %   Example : Plan a path through a maze
-            %   ------------------------------------
-            %   % Load a costmap of a maze
-            %   data = load('mazeMap.mat');
-            %   mazeMap = data.mazeMap;
-            %
-            %   % Define a start and a goal
-            %   startPose = [3 2 0];
-            %   goalPose  = [45 35 135];
-            %
-            %   % Create an RRT planner
-            %   planner = pathPlannerRRT(mazeMap, 'MinTurningRadius', 1);
-            %
-            %   % Plan a path to the goal
-            %   refPath = plan(planner, startPose, goalPose)
-            %
-            %   % Check if a path was found.
-            %   pathFound = ~isempty(refPath.KeyPoses)
-            %
-            %   % Plot the planner
-            %   figure, plot(planner)
-            %
-            %
-            %   See also checkPathValidity, digraph.
-            
+           
             nargoutchk(0,2);
             
             this.validatePoses(startPose, goalPose);
@@ -413,8 +357,11 @@ classdef myPathPlannerRRT < driving.planning.PathPlanner
             
             varargout{1} = this.Path;
             
-            if nargout>1
-                varargout{2} = this.Tree.toDigraph();
+            
+            if nargout == 2
+                varargout{2} = this.Action;
+            elseif nargout == 3
+                varargout{3} = this.Tree.toDigraph();
             end
         end
         
@@ -712,9 +659,8 @@ classdef myPathPlannerRRT < driving.planning.PathPlanner
             this.Tree.addNode(startPose);
             
             maxIter = this.MaxIterations;
-            
+            tic
             for n = 1 : maxIter
-                
                 % Sample collision-free pose with goal biasing
                 randPose = this.sampleCollisionFreeWithGoalBiasing();
                 
@@ -759,24 +705,26 @@ classdef myPathPlannerRRT < driving.planning.PathPlanner
                     end
                 end
             end
-            
+            toc
             if ~isempty(this.GoalNodes)
                 
                 % Find path through tree
-                [path,cost] = this.Tree.shortestPathFromRoot(...
+                [path, action, cost] = this.Tree.shortestPathFromRoot(...
                     this.BestGoalNode, this.GoalNodes);
-                
                 pathPoses = this.Tree.Nodes(path,:);
-                pathPoses(:,3) = rad2deg(pathPoses(:,3));
+%                 pathPoses(:,3) = rad2deg(pathPoses(:,3));
             else
                 % No path was found
-                pathPoses = zeros(0,3);
+                fprintf("Path not found!\n");
+                pathPoses = zeros(0,6);
+                action = zeros(0,6);
                 cost      = 0;
             end
             
             % Construct driving.Path object to hold path
             this.Path = driving.Path.create(pathPoses, ...
                 this.ConnectionMechanism, cost);
+            this.Action = action;
         end
     end
     
@@ -802,6 +750,7 @@ classdef myPathPlannerRRT < driving.planning.PathPlanner
             
             % If any pose is outside the map or in collision, bail out.
             if any(~free)
+%                 fprintf("collide!");
                 pose = [];
             else
                 pose = posesInterp(end,:);

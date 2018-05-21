@@ -51,13 +51,14 @@ classdef myVehicle
         end
         
         function nextState = propagate(this, currentState, input, duration)
+%             tic
             validateattributes(currentState, {'double'},{'numel',6,'nonempty'},'Forward propagete', 'currentState', 1);
             validateattributes(input,{'double'},{'numel',2,'nonempty'},'Forward propagete', 'input', 2);
             validateattributes(duration,{'double'},{'positive','<=',10,'>=',this.StepSize,'nonempty'},'Forward propagete', 'duration', 3);
 
             %Runge-Kutta integration
             nextState = this.RungeKutta(currentState, input, duration);
-
+%             toc
         end
         
         function endState = RungeKutta(this, startState, input, duration)
@@ -79,12 +80,12 @@ classdef myVehicle
                 k4 = this.diffEquations(state + stepSize * k3, input);
                 diff_state = (stepSize / 6) * (k1 + 2*k2 + 2*k3 + k4);
                 state = state + (stepSize / 6) * (k1 + 2*k2 + 2*k3 + k4);
-                fprintf("diff_state: \n XPosition: %f;  YPosition: %f; YawAngle: %f; \n XVelocity: %f YVelocity: %f YawRate: %f\n", ...
-                        diff_state(1), diff_state(2),diff_state(3) * 180/pi, diff_state(4),diff_state(5),diff_state(6) * 180/pi);
+%                 fprintf("diff_state: \n XPosition: %f;  YPosition: %f; YawAngle: %f; \n XVelocity: %f YVelocity: %f YawRate: %f\n", ...
+%                         diff_state(1), diff_state(2),diff_state(3) * 180/pi, diff_state(4),diff_state(5),diff_state(6) * 180/pi);
             end
             endState = state;
-             fprintf("endState: \n XPosition: %f;  YPosition: %f; YawAngle: %f; \n XVelocity: %f YVelocity: %f YawRate: %f\n", ...
-                        endState(1), endState(2),endState(3) * 180/pi, endState(4),endState(5),endState(6) * 180/pi);
+%              fprintf("endState: \n XPosition: %f;  YPosition: %f; YawAngle: %f; \n XVelocity: %f YVelocity: %f YawRate: %f\n", ...
+%                         endState(1), endState(2),endState(3) * 180/pi, endState(4),endState(5),endState(6) * 180/pi);
         end
     end
     
@@ -136,12 +137,12 @@ classdef myVehicle
             Frl = input(2);
             
             %slip angle - todo
-            if((Vy + lf * omega) ~= 0)
+            if(Vx ~= 0)
                 alphaF = delta - atan((Vy + lf * omega)/Vx) ;
             else
-                alphaF = delta;
+                alphaF = 0;
             end
-            if((Vy - lr * omega) ~= 0)
+            if(Vx ~= 0)
                 alphaR = - atan((Vy - lr * omega)/Vx);
             else 
                 alphaR = 0;
@@ -166,7 +167,7 @@ classdef myVehicle
             if(abs(Frc) > Frlimit)
                 Frc = Frlimit * sign(Frc);
             end
-            fprintf("alphaF: %f;  alphaR: %f;\n Ffc: %f;  Frc: %f\n", alphaF * 180 / pi, alphaR * 180 / pi, Ffc, Frc);
+%             fprintf("alphaF: %f;  alphaR: %f;\n Ffc: %f;  Frc: %f\n", alphaF * 180 / pi, alphaR * 180 / pi, Ffc, Frc);
            
             %aerodynamic resistance - todo
             Af = this.AF;

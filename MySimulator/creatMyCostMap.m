@@ -1,7 +1,7 @@
 function costmap = creatMyCostMap()
 figure
 axis equal
-[X,Y]=meshgrid(0:0.1:150,-50:0.1:50);
+[X,Y]=meshgrid(0:0.1:50	,-15:0.1:15);
 Y = flipud(Y);
 
 tic
@@ -39,7 +39,7 @@ combinedMap(find(combinedMap < 0)) = 0;
 % imshow(combinedMap)
 res = 0.1; % meters
 costmap = vehicleCostmap(combinedMap, 'CellSize', res, ...
-                                       'MapLocation', [0, -50], ...
+                                       'MapLocation', [0, -15], ...
                                        'InflationRadius', 0.3);
 plot(costmap);
 

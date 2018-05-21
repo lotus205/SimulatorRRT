@@ -155,6 +155,7 @@ classdef myUniformPoseSampler < vision.internal.EnforceScalarHandle
                 rand(this.PoseDimensions, this.BufferSize, 'like', this.LowerLimits);
             
             this.PoseIndex = 1;
+%             this.checkForCollisions();
         end
         
         %------------------------------------------------------------------
@@ -174,7 +175,7 @@ classdef myUniformPoseSampler < vision.internal.EnforceScalarHandle
                 
                 this.CollisionFree = checkFreeVehiclePoses(this.Costmap, ...
                     vehiclePoses, throwError);
-                fprintf("CollisionFree called in uniformsmapler");
+                fprintf("CollisionFree called in uniformsmapler\n");
             end
         end
     end

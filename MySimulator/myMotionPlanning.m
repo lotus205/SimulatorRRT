@@ -1,12 +1,12 @@
 function controlOutput = myMotionPlanning(costmapStruct, vehicleDimsStruct, ...
     currentPose, nextGoal, startPose, ...
-    minIterations, connectionDistance, minTurningRadius)
+    minIterations, connectionDistance, minTurningRadius, currentTime)
 
 %helperSLMotionPlanning plan a feasible path.
 
 % Copyright 2017-2018 The MathWorks, Inc.
 
-persistent motionPlanner nextGoalPose controlSequence vehiclePose
+persistent motionPlanner nextGoalPose controlSequence vehiclePose path
 
 if isempty(motionPlanner)
     % Initialize vehicleDimensions object
@@ -35,18 +35,26 @@ if isempty(motionPlanner)
     
     nextGoalPose  = nextGoal;
     vehiclePose   = startPose;
-    fprintf('myrrt built');
-    controlSequence = plan(motionPlanner, vehiclePose, nextGoalPose);
+    fprintf('My RRT init\n');
+    [path, controlSequence] = plan(motionPlanner, vehiclePose, nextGoalPose);
 end
 
 % Plan a new path if there is a new goal pose
 if ~isequal(nextGoalPose, nextGoal)
     nextGoalPose  = nextGoal;
-    vehiclePose   = currentPose;
-    controlSequence = plan(motionPlanner, vehiclePose, nextGoalPose);  
+    vehiclePose   = startPose;
+    [path, controlSequence] = plan(motionPlanner, vehiclePose, nextGoalPose);  
 end
 
 % Output reference path as a bus signal
-controlOutput                    = struct;
-controlOutput.steeringAng        = 1;
-controlOutput.force              = 1;
+
+if(currentTime < size(controlSequence, 1) * 0.5)
+    index = ceil(currentTime / 0.5);
+    if(index == 0)
+        index = 1;
+    end
+    controlOutput = controlSequence(index, :);
+else
+    controlOutput = [0 0];
+    set_param(gcs, 'SimulationCommand', 'stop');
+end
