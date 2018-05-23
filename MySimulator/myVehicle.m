@@ -54,7 +54,7 @@ classdef myVehicle
 %             tic
             validateattributes(currentState, {'double'},{'numel',6,'nonempty'},'Forward propagete', 'currentState', 1);
             validateattributes(input,{'double'},{'numel',2,'nonempty'},'Forward propagete', 'input', 2);
-            validateattributes(duration,{'double'},{'positive','<=',10,'>=',this.StepSize,'nonempty'},'Forward propagete', 'duration', 3);
+            validateattributes(duration,{'double'},{'positive','<=',30,'>=',this.StepSize,'nonempty'},'Forward propagete', 'duration', 3);
             
             parser = inputParser;
             parser.FunctionName = "vehicle propagate";
@@ -121,34 +121,69 @@ classdef myVehicle
 %              fprintf("endState: \n XPosition: %f;  YPosition: %f; YawAngle: %f; \n XVelocity: %f YVelocity: %f YawRate: %f\n", ...
 %                         endState(1), endState(2),endState(3) * 180/pi, endState(4),endState(5),endState(6) * 180/pi);
         end
-        function Fy = lateralForce(this, alpha)
-            r = 0;
-            Fz = 5;
-            a0 = 1.65;
-            a1 = -34;
-            a2 = 1250;
-            a3 = 3036;
-            a4 = 12.8;
-            a5 = 0.00501;
-            a6 = -0.02103;
-            a7 = 0.77394;
-            a8 = 0.0022890;
-            a9 = 0.013442;
-            a10 = 0.003709;
-            a11 = 19.1656;
-            a12 = 1.21356;
-            a13 = 6.26206;
-            C = a0;
-            D = a1 * Fz^2 + a2 * Fz;
-            BCD = a3 * sin(2 * atan(Fz/a4)) * (1 - a5 * abs(r));
-            B = BCD / (C * D);
-            Sh = a9 * Fz + a10 + a8 * r;
-            k = alpha + Sh;
-            Sv = a11 * Fz * r + a12 * Fz + a13;
-            E = a6 * Fz^2 + a7;
+        function [Fyf, Fyr] = lateralForce(this, muyf, muyr, Fzf, Fzr, alphaF, alphaR)
+                        % lateral force MF Tire parameters
+            bf = 12;        %       cornering factor
+            Cf = 1.3;       %       asymptotic factor
+            df = 0.95;      %       peak factor
+            Ef = -0.1;       %       shape factor
+            br = 14;
+            Cr = 1.3;
+            dr = 1;
+            Er = -0.1;
             
-            Fy = D * sin(C * atan(B * k - E * (B * k - atan(B * k)))) + Sv;
+            
+            Df = muyf * df * Fzf;
+            Bf = bf/muyf;
+            Fyf = Df * sin(Cf * atan(Bf * alphaF - Ef * (Bf * alphaR - atan(Bf * alphaF))));
+            
+            Dr = muyr * dr * Fzr;
+            Br = br/muyr;
+            Fyr = Dr * sin(Cr * atan(Br * alphaR - Er * (Br * alphaR - atan(Br * alphaR))));
         end
+        
+        function [muyf, muyr, Fxf, Fxr] = FxFyMuy(this, Vx, Fx)
+            
+            % resistance forces
+            m   = 1600;             % [kg]      vehicle mass
+            fv      = .02;        			% []		rolling resistance coeff.
+            rho 	= 1.2;					% [kg/m3]	air density
+            Cd  	= .3;					% []		drag coefficient
+            S   	= 2;					% [m2]		front surface
+            mu = 1;
+            g  = 9.80665;
+            Fx = Fx - m*g*fv - 0.5 * rho * Cd * S * Vx^2;
+            
+            gT  = 0;                % traction ratio: 1 FWD, 0 RWD, 0.5 4WD (50:50)
+            gB  = 2/3;                % brake ratio: F/F+R
+            
+            if(Fx>0)
+                gT = gT; %%Traction
+            else
+                gT = gB; %%Brake
+            end
+            
+            m   = 1600;             % [kg]      vehicle mass
+            l   = 2.7;              % [m]       wheelbase
+            lf  = 1;                % [m]       distance of c.o.g. from front axle
+            lr  = l-lf;             % [m]       distance of c.o.g. from rear axle
+            Fzf = m*g*lr/l;
+            Fzr = m*g*lf/l;
+            
+            Fxf = Fx * gT;
+            tempRatio = (Fxf/Fzf)^2;
+            tempRatio(tempRatio>1) = 1;
+            tempRatio(tempRatio<0) = 0;
+            muyf = sqrt(mu^2 - tempRatio);
+            
+            Fxr = Fx * (1 - gT);
+            tempRatio = (Fxr/Fzr)^2;
+            tempRatio(tempRatio>1) = 1;
+            tempRatio(tempRatio<0) = 0;
+            muyr = sqrt(mu^2 - tempRatio);
+            
+        end
+        
     end
     
     methods (Access = private)
@@ -184,29 +219,11 @@ classdef myVehicle
             l   = 2.7;              % [m]       wheelbase
             lf  = 1;                % [m]       distance of c.o.g. from front axle
             lr  = l-lf;             % [m]       distance of c.o.g. from rear axle
+            g   = 9.80665;
             Fzf = m*g*lr/l;
             Fzr = m*g*lf/l;
-            gT  = 0;                % traction ratio: 1 FWD, 0 RWD, 0.5 4WD (50:50)
-            gB  = 2/3;                % brake ratio: F/F+R
             
-            % resistance forces
-            fv      = .02;        			% []		rolling resistance coeff.
-            rho 	= 1.2;					% [kg/m3]	air density
-            Cd  	= .3;					% []		drag coefficient
-            S   	= 2;					% [m2]		front surface
-            
-            % lateral force MF Tire parameters
-            bf = 12;        %       cornering factor
-            Cf = 1.3;       %       asymptotic factor
-            df = 0.95;      %       peak factor
-            Ef = -0.1;       %       shape factor
-            br = 14;
-            Cr = 1.3;
-            dr = 1;
-            Er = -0.1;
-            L  = 2;         % [m]   relaxation lenght
-            mu = 1;
-            
+               
             x   = state(1);
             y   = state(2);
             psi = state(3); % Yaw angle
@@ -215,47 +232,34 @@ classdef myVehicle
             omega = state(6); % Yaw rate
             
             delta = input(1); % Steering angle
-            Frl = input(2);   % Force on rear wheels
+            Fx = input(2);   % Force on rear wheels
             
+            [muyf, muyr, Fxf, Fxr] = this.FxFyMuy(Vx, Fx);
             %slip angle 
-            if(Vx ~= 0)
-                alphaF = delta - atan((Vy + lf * omega)/Vx) ;
-            else
-                alphaF = 0;
-            end
-            if(Vx ~= 0)
-                alphaR = - atan((Vy - lr * omega)/Vx);
-            else 
-                alphaR = 0;
-            end
+%             if(Vx ~= 0)
+                alphaF = delta - atan2(Vy + lf * omega, Vx);
+%             else
+%                 alphaF = 0;
+%             end
+%             if(Vx ~= 0)
+                alphaR = - atan2(Vy - lr * omega, Vx);
+%             else 
+%                 alphaR = 0;
+%             end
             
             %lateral force
-            Ffc = Cf * alphaF;            
-            Frc = Cr * alphaR;
-%             Ffc = this.lateralForce(alphaF * 180/pi) / 2;
-%             Frc = this.lateralForce(alphaR * 180/pi) / 2;
+%             Ffc = Cf * alphaF;            
+%             Frc = Cr * alphaR;
+            [Ffc, Frc] = this.lateralForce(muyf, muyr, Fzf, Fzr, alphaF, alphaR);
             
-            Frlimit =  m * g * mu * 0.25 + 1500;
-            if(abs(Ffc) > Frlimit)
-                Ffc = Frlimit * sign(Ffc);
-            end
-            if(abs(Frc) > Frlimit)
-                Frc = Frlimit * sign(Frc);
-            end
-%             fprintf("alphaF: %f;  alphaR: %f;\n Ffc: %f;  Frc: %f\n", alphaF * 180 / pi, alphaR * 180 / pi, Ffc, Frc);
+%              fprintf("alphaF: %f;  alphaR: %f;\n Ffc: %f;  Frc: %f\n", alphaF * 180 / pi, alphaR * 180 / pi, Ffc, Frc);
            
-            %aerodynamic resistance 
-            Af = this.AF; % Longitudinal drag area (m^2)
-            Cd = this.CD; % Logitudinal drag coefficient (-)
-            rho = 1.29;   % Density of air (kg / m^3)
-            Faero = 0.5 * rho * Vx^2 * Cd * Af;
-     
             x_diff = Vx * cos(psi) - Vy * sin(psi); % X position
             y_diff = Vx * sin(psi) + Vy * cos(psi); % Y position 
             psi_diff = omega;                       % Yaw angle
-            Vx_diff = omega * Vy + Frl / m - 2 * Ffc * sin(delta) / m - Faero / m; % Logitude speed
-            Vy_diff = -omega * Vx + 2 * Frc / m + 2 * Ffc * cos(delta) / m; % Lateral speed
-            omega_diff = (2 / Iz) * (-Frc * lr + Ffc * lf * cos(delta)); % Yaw rate
+            Vx_diff = omega * Vy + Fxr / m + Fxf * cos(delta) / m - Ffc * sin(delta) / m; % Logitude speed
+            Vy_diff = -omega * Vx + Frc / m + Fxf * sin(delta) / m + Ffc * cos(delta) / m; % Lateral speed
+            omega_diff = (1 / Jz) * (-Frc * lr + Ffc * cos(delta) * lf  +  Fxf * sin(delta) * lf); % Yaw rate
             
 %             %test
 %             x_diff = x;
