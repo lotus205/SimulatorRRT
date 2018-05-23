@@ -57,6 +57,15 @@ classdef myConnectionMechanism < driving.planning.ConnectionMechanism
             poses = drivingDubinsInterpolate(from(:, 1:3), to(:, 1:3), ...
                 this.ConnectionDistance, this.NumSteps, ...
                 this.TurningRadius);
+%               poseNum = this.NumSteps;
+%               diff = from - to;
+%               interp = zeros(poseNum, size(from, 2));
+%               for i = 1 : size(from, 2)
+%                   interp(:, i) = diff(:, i) * linspace(0, 0.1, poseNum);
+%               end
+%               poses = from + interp;
+%               
+%               poses = poses(:, 1:3);
         end
     end
 end

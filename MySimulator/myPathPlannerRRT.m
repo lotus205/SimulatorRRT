@@ -712,7 +712,7 @@ classdef myPathPlannerRRT < driving.planning.PathPlanner
                 [path, action, cost] = this.Tree.shortestPathFromRoot(...
                     this.BestGoalNode, this.GoalNodes);
                 pathPoses = this.Tree.Nodes(path,:);
-%                 pathPoses(:,3) = rad2deg(pathPoses(:,3));
+                 pathPoses(:,3) = rad2deg(pathPoses(:,3));
             else
                 % No path was found
                 fprintf("Path not found!\n");
@@ -988,11 +988,11 @@ classdef myPathPlannerRRT < driving.planning.PathPlanner
                 to   = treeEdges(n,2);
                 
                 % Add start of link
-                poses(idx(1),:) = treeNodes(from,:);
+                poses(idx(1),:) = treeNodes(from, 1:3);
                 
                 % Add points along link
                 poses(idx+1,:) = this.ConnectionMechanism.interpolate(...
-                    treeNodes(from,:), treeNodes(to,:) );
+                    treeNodes(from, 1:3), treeNodes(to, 1:3) );
                 
                 idx = idx + numSteps + 2;
             end
