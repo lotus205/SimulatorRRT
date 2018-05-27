@@ -731,7 +731,7 @@ classdef myPathPlannerRRT < driving.planning.PathPlanner
             
             % Check that poses are obstacle-free.
             throwError = false;
-            free = this.Costmap.checkFreeVehiclePoses(poses, throwError);
+            free = this.Costmap.checkFreeVehiclePoses(poses(:, 1:3), throwError);
             if any(~free)
                 error(message('driving:pathPlannerRRT:posesInCollision'))
             end
