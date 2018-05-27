@@ -37,6 +37,9 @@ if isempty(motionPlanner)
     vehiclePose   = startPose;
     fprintf('My RRT init\n');
     [path, controlSequence] = plan(motionPlanner, vehiclePose, nextGoalPose);
+    assignin('base', 'motionPlanner', motionPlanner);
+    assignin('base', 'path', path);
+    assignin('base', 'controlSequence', controlSequence);
 end
 
 % Plan a new path if there is a new goal pose
@@ -44,17 +47,21 @@ if ~isequal(nextGoalPose, nextGoal)
     nextGoalPose  = nextGoal;
     vehiclePose   = startPose;
     [path, controlSequence] = plan(motionPlanner, vehiclePose, nextGoalPose);  
+    assignin('base', 'motionPlanner', motionPlanner);
+    assignin('base', 'path', path);
+    assignin('base', 'controlSequence', controlSequence);
 end
 
 % Output reference path as a bus signal
 
-if(currentTime < size(controlSequence, 1) * 0.5)
-    index = ceil(currentTime / 0.5);
+if(currentTime < size(controlSequence, 1) * 0.3)
+    index = ceil(currentTime / 0.3);
     if(index == 0)
         index = 1;
     end
     controlOutput = controlSequence(index, :);
 else
     controlOutput = [0 0];
+    plot(motionPlanner,'Tree','on')
     set_param(gcs, 'SimulationCommand', 'stop');
 end

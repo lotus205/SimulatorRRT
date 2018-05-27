@@ -13,12 +13,7 @@ Ts = 0.1;               % Simulation sample time                (s)
 
 %% Ego Car Parameters
 % Dynamics modeling parameters
-m       = 1575;     % Total mass of vehicle                          (kg)
-Iz      = 2875;     % Yaw moment of inertia of vehicle               (m*N*s^2)
-lf      = 1.2;      % Longitudinal distance from c.g. to front tires (m)
-lr      = 1.6;      % Longitudinal distance from c.g. to rear tires  (m)
-Cf      = 19000;    % Cornering stiffness of front tires             (N/rad)
-Cr      = 33000;    % Cornering stiffness of rear tires              (N/rad)
+data_vehicle;
 
 %% Controller parameter
 PredictionHorizon = 30; % Number of steps for preview    (N/A)
