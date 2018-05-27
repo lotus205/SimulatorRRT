@@ -537,7 +537,7 @@ classdef myPathPlannerRRT < driving.planning.PathPlanner
                 [path, action, cost] = this.Tree.shortestPathFromRoot(...
                     this.BestGoalNode, this.GoalNodes);
                 pathPoses = this.Tree.Nodes(path,:);
-                 pathPoses(:,3) = rad2deg(pathPoses(:,3));
+                pathPoses(:,3) = rad2deg(pathPoses(:,3));
             else
                 % No path was found
                 fprintf("Path not found!\n");
