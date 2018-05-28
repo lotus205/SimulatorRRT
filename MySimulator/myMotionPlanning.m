@@ -63,5 +63,6 @@ if(currentTime < size(controlSequence, 1) * 0.3)
 else
     controlOutput = [0 0];
     plot(motionPlanner,'Tree','on')
-    set_param(gcs, 'SimulationCommand', 'stop');
+    rootSystem = bdroot(gcs);
+    set_param(rootSystem, 'SimulationCommand', 'stop');
 end
