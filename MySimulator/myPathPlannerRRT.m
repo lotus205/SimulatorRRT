@@ -19,7 +19,7 @@ classdef myPathPlannerRRT < driving.planning.PathPlanner
         %   +/-yTol, +/-thetaTol] of the goalPose.
         %
         %   Default: [0.5, 0.5, 5]
-        GoalTolerance = [2, 2, 10, 4, 2, 2];
+        GoalTolerance = [2, 1, 8, 4, 2, 2];
         
         %GoalBias Probability of selecting goal pose.
         %   Probability with which to select goal pose for tree expansion.
@@ -99,6 +99,9 @@ classdef myPathPlannerRRT < driving.planning.PathPlanner
         %
         %   Default: true
         ApproximateSearch = true;
+        
+        
+        Tree
     end
     
     properties (Access = protected)
@@ -129,9 +132,9 @@ classdef myPathPlannerRRT < driving.planning.PathPlanner
         Action
     end
     
-    properties (Access = ?tpathPlannerRRT, Hidden)
-        Tree
-    end
+%     properties (Access = ?tpathPlannerRRT, Hidden)
+%         Tree
+%     end
     
     properties (Access = private, Dependent, Transient)
         %NumConnectionSteps
@@ -367,7 +370,7 @@ classdef myPathPlannerRRT < driving.planning.PathPlanner
             % at which collision checking is performed against the map. We
             % use a resolution factor of 5, i.e. an interpolation step at a
             % distance of 0.2*cellSize.
-            resolutionFactor = 5;
+            resolutionFactor = 0.5;
             
             if isfinite(this.ConnectionDistance)
                 numSteps = resolutionFactor * max(3, ...
@@ -573,6 +576,7 @@ classdef myPathPlannerRRT < driving.planning.PathPlanner
             throwError = false;
             free = checkFreeVehiclePoses(this.Costmap, posesInterp, throwError);
             
+%             free = 1;
             % If any pose is outside the map or in collision, bail out.
             if any(~free)
 %                 fprintf("collide!");

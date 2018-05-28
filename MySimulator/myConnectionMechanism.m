@@ -48,6 +48,7 @@ classdef myConnectionMechanism < driving.planning.ConnectionMechanism
             
             d = drivingDubinsDistance(from(:, 1:3), to(:, 1:3), this.TurningRadius);
             d = d + abs(from(:, 4:6) - to(:, 4:6)) * [3 3 3]' ;
+%             d = abs(from - to) * [3 3 3 3 3 3]' ;
             
         end
         
@@ -58,10 +59,16 @@ classdef myConnectionMechanism < driving.planning.ConnectionMechanism
                 this.ConnectionDistance, this.NumSteps, ...
                 this.TurningRadius);
 %               poseNum = this.NumSteps;
-%               diff = from - to;
+%               connectionDistance = this.ConnectionDistance;
+%               from = from(:, 1:3);
+%               to = to(:, 1:3);
+%               diff = to - from;
+%               if(norm(diff) > connectionDistance)
+%                   diff = diff * connectionDistance / norm(diff);
+%               end
 %               interp = zeros(poseNum, size(from, 2));
 %               for i = 1 : size(from, 2)
-%                   interp(:, i) = diff(:, i) * linspace(0, 0.1, poseNum);
+%                   interp(:, i) = diff(:, i) * linspace(0, 1, poseNum);
 %               end
 %               poses = from + interp;
 %               

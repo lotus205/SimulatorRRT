@@ -44,6 +44,6 @@ scenario = createSimulinkScenarioData(...
         roadCenters, laneSpecification, simStopTime,...
         'lkaScenarioSimulink.mat');
 
-costmap = creatMyCostMap();
+Costmap = creatMyCostMap();
 
 fprintf("setup called\n");

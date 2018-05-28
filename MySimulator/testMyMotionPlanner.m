@@ -9,6 +9,7 @@ motionPlanner = myPathPlannerRRT(costmap, ...
     'ConnectionMethod', 'Customize');
 
 nextGoalPose  = nextGoal;
+ nextGoalPose = [13 -2 0 0 0 0];
 vehiclePose   = startPose;
 fprintf('My RRT init\n');
 [path, controlSequence] = plan(motionPlanner, vehiclePose, nextGoalPose);

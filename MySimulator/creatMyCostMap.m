@@ -40,7 +40,7 @@ combinedMap(find(combinedMap < 0)) = 0;
 res = 0.1; % meters
 costmap = vehicleCostmap(combinedMap, 'CellSize', res, ...
                                        'MapLocation', [0, -15], ...
-                                       'InflationRadius', 0.3);
+                                       'InflationRadius', 1.4);
 plot(costmap);
 
 end

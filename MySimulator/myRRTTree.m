@@ -96,9 +96,11 @@ classdef myRRTTree < vision.internal.EnforceScalarHandle
             Forces = [-3000 0 2500 5000];
             this.pActions = zeros(this.pNumActions, 2);
             
+            ii = 1;
             for i = 1:numAngles
                 for j = 1:numForces
-                     this.pActions(i * j, :) = [SteeringAngles(i) Forces(j)];
+                     this.pActions(ii, :) = [SteeringAngles(i) Forces(j)];
+                     ii = ii + 1;
                 end
             end
         end
@@ -193,7 +195,7 @@ classdef myRRTTree < vision.internal.EnforceScalarHandle
             
             propagateTime = this.proTime;
             for i = 1 : numActions
-                finalPoses(i,:) = this.Vehicle.propagate(this.NodeBuffer(fromId,:), this.pActions(i, :), propagateTime);
+                finalPoses(i,:) = this.Vehicle.propagate(this.NodeBuffer(fromId,:), actions(i, :), propagateTime);
             end
             distances = this.NeighborSearcher.distance(finalPoses, this.NodeBuffer(toId, :));
             [~, minId] = min(distances);

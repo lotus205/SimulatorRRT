@@ -155,7 +155,7 @@ classdef myUniformPoseSampler < vision.internal.EnforceScalarHandle
                 rand(this.PoseDimensions, this.BufferSize, 'like', this.LowerLimits);
             
             this.PoseIndex = 1;
-%             this.checkForCollisions();
+            this.checkForCollisions();
         end
         
         %------------------------------------------------------------------

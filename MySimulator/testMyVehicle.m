@@ -4,7 +4,7 @@ vehicle = myVehicle;
 
 currentState = [0 0 0 0 0 0]; % [x, y, yawAngle, longitudeSpeed, lateralSpeed, yawRate]
 input = [20*pi/180 2000];     % steering angle in rad
-duration = 4;                  % time (s)
+duration = 25;                  % time (s)
 tic
 [nextState, log, t] = vehicle.propagate(currentState, input, duration, 'Log', true);
 toc
