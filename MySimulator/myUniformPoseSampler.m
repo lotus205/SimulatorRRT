@@ -23,7 +23,8 @@
 % Copyright 2017 The MathWorks, Inc.
 classdef myUniformPoseSampler < vision.internal.EnforceScalarHandle
     
-    properties (Access = private)
+%     properties (Access = private)
+  properties (Access = public)
         %Dimensions
         %x y yaw, vx vy w 6 dimensions 
         PoseDimensions = 6;
@@ -79,9 +80,9 @@ classdef myUniformPoseSampler < vision.internal.EnforceScalarHandle
                     'UniformPoseSampler', 'precision');
             end
             %x y yaw, vx vy w 6 dimensions 
-            this.LowerLimits = cast([mapExtent(1), mapExtent(3), 0, 0, 0, -3]', ...
+            this.LowerLimits = cast([mapExtent(1), mapExtent(3), 0, 0, -1, -0.8]', ...
                 precision);
-            this.UpperLimits = cast([mapExtent(2), mapExtent(4), 2*pi, 10, 10, 3]', ...
+            this.UpperLimits = cast([mapExtent(2), mapExtent(4), 2*pi, 15, 1, 0.8]', ...
                 precision);
             
             this.fillPoseBuffer();

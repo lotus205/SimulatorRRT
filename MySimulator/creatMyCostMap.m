@@ -1,7 +1,7 @@
 function costmap = creatMyCostMap()
 figure
 axis equal
-[X,Y]=meshgrid(0:0.1:50	,-15:0.1:15);
+[X,Y]=meshgrid(0:0.1:120,-15:0.1:30);
 Y = flipud(Y);
 
 tic

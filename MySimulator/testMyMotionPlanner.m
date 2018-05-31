@@ -3,15 +3,16 @@ clear
 load testMotionPlanner
 
 % Initialize pathPlannerRRT object
-motionPlanner = myPathPlannerRRT(costmap, ...
+motionPlanner = myPathPlannerRRT(Costmap, ...
     'MinIterations',     1000, ...
     'ConnectionDistance',3, ...
-    'ConnectionMethod', 'Customize');
+    'ConnectionMethod', 'Customize', ...
+    'GoalBias', 0.1, ...
+    'MaxIterations', 10000);
 
-nextGoalPose  = nextGoal;
- nextGoalPose = [13 -2 0 0 0 0];
-vehiclePose   = startPose;
+nextGoalPose = [40 7 0 0 0 0];
+vehiclePose   = [1 0 0 0 0 0];
 fprintf('My RRT init\n');
-[path, controlSequence] = plan(motionPlanner, vehiclePose, nextGoalPose);
+[path, controlSequence, treeDiagraph] = plan(motionPlanner, vehiclePose, nextGoalPose);
 
 plot(motionPlanner,'Tree','on')

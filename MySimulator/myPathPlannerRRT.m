@@ -12,21 +12,9 @@ classdef myPathPlannerRRT < driving.planning.PathPlanner
     
     properties
         %GoalTolerance Tolerance around goal pose.
-        %   Acceptable tolerance around goal pose specified as a 3-element
-        %   vector [xTol, yTol, thetaTol]. xTol and yTol are specified in
-        %   world units. thetaTol is specified in degrees. A goal is
-        %   reached if the planner finds a path to a pose within [+/-xTol,
-        %   +/-yTol, +/-thetaTol] of the goalPose.
-        %
-        %   Default: [0.5, 0.5, 5]
         GoalTolerance = [2, 1, 8, 4, 2, 2];
         
         %GoalBias Probability of selecting goal pose.
-        %   Probability with which to select goal pose for tree expansion.
-        %   Increasing this value biases exploration towards goal at the
-        %   cost of possibly getting stuck at an obstacle.
-        %
-        %   Default: 0.1
         GoalBias = 0.1;
         
         %ConnectionMethod Method used to connect poses.
@@ -171,7 +159,7 @@ classdef myPathPlannerRRT < driving.planning.PathPlanner
         function varargout = plan(this, startPose, goalPose)
             %plan Plan a path using RRT*.
            
-            nargoutchk(0,2);
+            nargoutchk(0,3);
             
             this.validatePoses(startPose, goalPose);
             
@@ -513,7 +501,7 @@ classdef myPathPlannerRRT < driving.planning.PathPlanner
                     nearestPose, nearestId, newPose, newId);
                 
                 % Rewire tree
-%                 this.rewireTree(nearPoses, nearIds, newPose, newId);
+                this.rewireTree(nearPoses, nearIds, newPose, newId);
                 
                 if this.inGoalRegion(newPose)
                     
