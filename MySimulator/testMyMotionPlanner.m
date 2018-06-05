@@ -8,11 +8,11 @@ motionPlanner = myPathPlannerRRT(Costmap, ...
     'ConnectionDistance',3, ...
     'ConnectionMethod', 'Customize', ...
     'GoalBias', 0.1, ...
-    'MaxIterations', 10000);
+    'MaxIterations', 3000);
 
-nextGoalPose = [40 7 0 0 0 0];
-vehiclePose   = [1 0 0 0 0 0];
+nextGoalPose = [40 5 pi/5 0 0 0];
+vehiclePose   = [2.5 0 0 0 0 0];
 fprintf('My RRT init\n');
-[path, controlSequence, treeDiagraph] = plan(motionPlanner, vehiclePose, nextGoalPose);
+[path, controlSequence, treeDiagraph] = plan(motionPlanner, vehicle Pose, nextGoalPose);
 
 plot(motionPlanner,'Tree','on')

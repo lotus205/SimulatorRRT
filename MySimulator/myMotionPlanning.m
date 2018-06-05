@@ -1,4 +1,4 @@
-function controlOutput = myMotionPlanning(costmapStruct, vehicleDimsStruct, ...
+    function controlOutput = myMotionPlanning(costmapStruct, vehicleDimsStruct, ...
     currentPose, nextGoal, startPose, ...
     minIterations, connectionDistance, minTurningRadius, currentTime)
 
@@ -35,7 +35,7 @@ if isempty(motionPlanner)
         'GoalBias', 0.1, ...
         'MaxIterations', 3000);
     
-    nextGoalPose  = [110 25 0 0 0 0];
+    nextGoalPose  = nextGoal;
     vehiclePose   = startPose;
     fprintf('My RRT init\n');
     [path, controlSequence] = plan(motionPlanner, vehiclePose, nextGoalPose);

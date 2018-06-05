@@ -12,7 +12,7 @@ classdef myPathPlannerRRT < driving.planning.PathPlanner
     
     properties
         %GoalTolerance Tolerance around goal pose.
-        GoalTolerance = [2, 1, 8, 4, 2, 2];
+        GoalTolerance = [1, 0.5, 8, 2, 1, 2];
         
         %GoalBias Probability of selecting goal pose.
         GoalBias = 0.1;
@@ -47,7 +47,7 @@ classdef myPathPlannerRRT < driving.planning.PathPlanner
         %   ---------------------------------------------------------------
         %
         %   Default: 'Dubins'
-        ConnectionMethod = 'Dubins';
+        ConnectionMethod = 'Customize';
         
         %ConnectionDistance Maximum distance between two connected nodes.
         %   Maximum distance between two connected nodes. Distance is
@@ -98,7 +98,8 @@ classdef myPathPlannerRRT < driving.planning.PathPlanner
         PoseDim = 6;
     end
     
-    properties (Access = private, Hidden)
+%     properties (Access = private, Hidden)
+    properties (Access = public)
         Version = ver('driving');
         
         Sampler
@@ -177,6 +178,7 @@ classdef myPathPlannerRRT < driving.planning.PathPlanner
             if nargout == 2
                 varargout{2} = this.Action;
             elseif nargout == 3
+                varargout{2} = this.Action;
                 varargout{3} = this.Tree.toDigraph();
             end
         end
@@ -529,6 +531,7 @@ classdef myPathPlannerRRT < driving.planning.PathPlanner
                     this.BestGoalNode, this.GoalNodes);
                 pathPoses = this.Tree.Nodes(path,:);
                 pathPoses(:,3) = rad2deg(pathPoses(:,3));
+                fprintf("Path created!\n");
             else
                 % No path was found
                 fprintf("Path not found!\n");
@@ -669,11 +672,17 @@ classdef myPathPlannerRRT < driving.planning.PathPlanner
             goalTol    = this.GoalTolerance;
             goalTol(3) = driving.planning.angleUtilities.convertAndWrapTo2Pi(...
                 goalTol(3));
+            goalTol(6) = driving.planning.angleUtilities.convertAndWrapTo2Pi(...
+                goalTol(6));
             
             TF = abs(pose(1)-goalPose(1)) <= goalTol(1) ...             % x in goal
                 && abs(pose(2)-goalPose(2)) <= goalTol(2) ...           % && y in goal
                 && abs(driving.planning.angleUtilities.angdiff(...
-                pose(3),goalPose(3))) <= goalTol(3);                    % && theta in goal
+                pose(3),goalPose(3))) <= goalTol(3) ...
+                && abs(pose(4)-goalPose(4)) <= goalTol(4) ...
+                && abs(pose(5)-goalPose(5)) <= goalTol(5) ...
+                && abs(driving.planning.angleUtilities.angdiff(...
+                pose(6),goalPose(6))) <= goalTol(6);                    % && theta in goal
         end
         
         %------------------------------------------------------------------
